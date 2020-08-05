@@ -4,25 +4,21 @@
 
 import pandas as pd
 from sklearn.model_selection import train_test_split
-import sklearn.datasets
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn import metrics
-import sklearn.metrics
-from sklearn.metrics import confusion_matrix
 from matplotlib import pyplot as plt
 from sklearn.linear_model import PassiveAggressiveClassifier
 from sklearn.feature_extraction.text import HashingVectorizer
 import itertools
 import numpy as np
-# from pandas_ml import ConfusionMatrix
 
 
 #--------------------------------------------------------------
 # Importing dataset using pandas dataframe
 #--------------------------------------------------------------
-df = pd.read_csv("FakeReal Dataset.csv")
+df = pd.read_csv("fake_or_real_news.csv")
     
 # Inspect shape of `df` 
 df.shape
@@ -41,7 +37,7 @@ df.head()
 # Separate the labels and set up training and test datasets
 #--------------------------------------------------------------
 y = df.label 
-# df = df.dropna()
+
 # Drop the `label` column
 df.drop("label", axis=1)      #where numbering of news article is done that column is dropped in dataset
 
@@ -63,7 +59,7 @@ count_train = count_vectorizer.fit_transform(X_train)                  # Learn t
 count_test = count_vectorizer.transform(X_test)
 
 # Initialize the `tfidf_vectorizer` 
-tfidf_vectorizer = TfidfVectorizer(stop_words='english')    # This removes words which appear in more than 70% of the articles
+tfidf_vectorizer = TfidfVectorizer(stop_words='english', max_df=0.7)    # This removes words which appear in more than 70% of the articles
 
 # Fit and transform the training data 
 tfidf_train = tfidf_vectorizer.fit_transform(X_train) 
@@ -136,61 +132,56 @@ def plot_confusion_matrix(cm, classes,
 # Naive Bayes classifier for Multinomial model 
 #--------------------------------------------------------------
 
-# clf = MultinomialNB() 
+clf = MultinomialNB() 
 
-# clf.fit(tfidf_train, y_train)                       # Fit Naive Bayes classifier according to X, y
+clf.fit(tfidf_train, y_train)                       # Fit Naive Bayes classifier according to X, y
 
-# pred = clf.predict(tfidf_test)                     # Perform classification on an array of test vectors X.
-# score = metrics.accuracy_score(y_test, pred)
-# print("accuracy(Mnb tfid):   %0.3f" % score)
-# cm = metrics.confusion_matrix(y_test, pred, labels=['FAKE', 'REAL'])
-# plot_confusion_matrix(cm, classes=['FAKE', 'REAL'])
-# print(cm)
+pred = clf.predict(tfidf_test)                     # Perform classification on an array of test vectors X.
+score = metrics.accuracy_score(y_test, pred)
+print("accuracy:   %0.3f" % score)
+cm = metrics.confusion_matrix(y_test, pred, labels=['FAKE', 'REAL'])
+plot_confusion_matrix(cm, classes=['FAKE', 'REAL'])
+print(cm)
 
 
-# clf = MultinomialNB()
+clf = MultinomialNB()
 
-# clf.fit(count_train, y_train)
+clf.fit(count_train, y_train)
 
-# pred = clf.predict(count_test)
-# score = metrics.accuracy_score(y_test, pred)
-# print("accuracy(Mnb count):   %0.3f" % score)
-# cm = metrics.confusion_matrix(y_test, pred, labels=['FAKE', 'REAL'])
-# plot_confusion_matrix(cm, classes=['FAKE', 'REAL'])
-# print(cm)
+pred = clf.predict(count_test)
+score = metrics.accuracy_score(y_test, pred)
+print("accuracy:   %0.3f" % score)
+cm = metrics.confusion_matrix(y_test, pred, labels=['FAKE', 'REAL'])
+plot_confusion_matrix(cm, classes=['FAKE', 'REAL'])
+print(cm)
 
 
 #--------------------------------------------------------------
 # Applying Passive Aggressive Classifier
 #--------------------------------------------------------------
 
-x=input("Enter news: ")
-x=[x]
-tfidf_test_input = tfidf_vectorizer.transform(x)
-
-linear_clf = PassiveAggressiveClassifier()
+linear_clf = PassiveAggressiveClassifier(max_iter=50)
 
 linear_clf.fit(tfidf_train, y_train)
-pred = linear_clf.predict(tfidf_test_input)
-print (pred)
-# score = metrics.accuracy_score(y_test, pred)
-# print("accuracy(PAC tfid):   %0.3f" % score)
-# cm = metrics.confusion_matrix(y_test, pred, labels=['FAKE', 'REAL'])
-# plot_confusion_matrix(cm, classes=['FAKE', 'REAL'])
-# print(cm)
+pred = linear_clf.predict(tfidf_test)
+score = metrics.accuracy_score(y_test, pred)
+print("accuracy:   %0.3f" % score)
+cm = metrics.confusion_matrix(y_test, pred, labels=['FAKE', 'REAL'])
+plot_confusion_matrix(cm, classes=['FAKE', 'REAL'])
+print(cm)
 
 
-# clf = MultinomialNB(alpha=0.1)               # Additive (Laplace/Lidstone) smoothing parameter
+clf = MultinomialNB(alpha=0.1)               # Additive (Laplace/Lidstone) smoothing parameter
 
-# last_score = 0
-# for alpha in np.arange(0,1,.1):
-#     nb_classifier = MultinomialNB(alpha=alpha)
-#     nb_classifier.fit(tfidf_train, y_train)
-#     pred = nb_classifier.predict(tfidf_test)
-#     score = metrics.accuracy_score(y_test, pred)
-#     if score > last_score:
-#         clf = nb_classifier
-    # print("Alpha: {:.2f} Score: {:.5f}".format(alpha, score))
+last_score = 0
+for alpha in np.arange(0,1,.1):
+    nb_classifier = MultinomialNB(alpha=alpha)
+    nb_classifier.fit(tfidf_train, y_train)
+    pred = nb_classifier.predict(tfidf_test)
+    score = metrics.accuracy_score(y_test, pred)
+    if score > last_score:
+        clf = nb_classifier
+    print("Alpha: {:.2f} Score: {:.5f}".format(alpha, score))
 
 
 def most_informative_feature_for_binary_classification(vectorizer, classifier, n=100):       # inspect the top 30 vectors for fake and real news
@@ -202,30 +193,30 @@ def most_informative_feature_for_binary_classification(vectorizer, classifier, n
     return top classes.)
     """
 
-#     class_labels = classifier.classes_
-#     feature_names = vectorizer.get_feature_names()                                            # Array mapping from feature integer indices to feature name
-#     topn_class1 = sorted(zip(classifier.coef_[0], feature_names))[:n]
-#     topn_class2 = sorted(zip(classifier.coef_[0], feature_names))[-n:]
+    class_labels = classifier.classes_
+    feature_names = vectorizer.get_feature_names()                                            # Array mapping from feature integer indices to feature name
+    topn_class1 = sorted(zip(classifier.coef_[0], feature_names))[:n]
+    topn_class2 = sorted(zip(classifier.coef_[0], feature_names))[-n:]
 
-#     for coef, feat in topn_class1:
-#         print(class_labels[0], coef, feat)
+    for coef, feat in topn_class1:
+        print(class_labels[0], coef, feat)
 
-#     print()
+    print()
 
-#     for coef, feat in reversed(topn_class2):
-#         print(class_labels[1], coef, feat)
+    for coef, feat in reversed(topn_class2):
+        print(class_labels[1], coef, feat)
 
 
-# most_informative_feature_for_binary_classification(tfidf_vectorizer, linear_clf, n=30)
-# feature_names = tfidf_vectorizer.get_feature_names()
+most_informative_feature_for_binary_classification(tfidf_vectorizer, linear_clf, n=30)
+feature_names = tfidf_vectorizer.get_feature_names()
 
-# ### Most real
-# sorted(zip(clf.coef_[0], feature_names), reverse=True)[:20]
+### Most real
+sorted(zip(clf.coef_[0], feature_names), reverse=True)[:20]
 
-# ### Most fake
-# sorted(zip(clf.coef_[0], feature_names))[:20]                               # clearly there are certain words which might show political intent and source in the top fake features (such as the words corporate and establishment).
+### Most fake
+sorted(zip(clf.coef_[0], feature_names))[:20]                               # clearly there are certain words which might show political intent and source in the top fake features (such as the words corporate and establishment).
 
-# tokens_with_weights = sorted(list(zip(feature_names, clf.coef_[0])))
+tokens_with_weights = sorted(list(zip(feature_names, clf.coef_[0])))
 #print(tokens_with_weights)
 
 #--------------------------------------------------------------
@@ -233,35 +224,59 @@ def most_informative_feature_for_binary_classification(vectorizer, classifier, n
 #--------------------------------------------------------------
 
 
-# hash_vectorizer = HashingVectorizer(alternate_sign=False , stop_words = 'english' ) #non-negative=True changed to alternate_sign=False 
-# hash_train = hash_vectorizer.fit_transform(X_train)
-# hash_test = hash_vectorizer.transform(X_test)
+hash_vectorizer = HashingVectorizer(stop_words='english', alternate_sign=False)
+hash_train = hash_vectorizer.fit_transform(X_train)
+hash_test = hash_vectorizer.transform(X_test)
 
-# #--------------------------------------------------------------
-# # Naive Bayes classifier for Multinomial model 
-# #-------------------------------------------------------------- 
+#--------------------------------------------------------------
+# Naive Bayes classifier for Multinomial model 
+#-------------------------------------------------------------- 
 
-# clf = MultinomialNB(alpha=.01)
+clf = MultinomialNB(alpha=.01)
 
-# clf.fit(hash_train, y_train)
-# pred = clf.predict(hash_test)
+clf.fit(hash_train, y_train)
+pred = clf.predict(hash_test)
+score = metrics.accuracy_score(y_test, pred)
+print("accuracy:   %0.3f" % score)
+cm = metrics.confusion_matrix(y_test, pred, labels=['FAKE', 'REAL'])
+plot_confusion_matrix(cm, classes=['FAKE', 'REAL'])
+print(cm)
+
+
+#--------------------------------------------------------------
+# Applying Passive Aggressive Classifier
+#--------------------------------------------------------------
+
+clf = PassiveAggressiveClassifier(max_iter=50)    
+
+clf.fit(hash_train, y_train)
+pred = clf.predict(hash_test)
+score = metrics.accuracy_score(y_test, pred)
+print("accuracy:   %0.3f" % score)
+cm = metrics.confusion_matrix(y_test, pred, labels=['FAKE', 'REAL'])
+plot_confusion_matrix(cm, classes=['FAKE', 'REAL'])
+print(cm)
+
+
+
+
+#--------------------------------------------------------------
+# Applying Passive Aggressive Classifier
+#--------------------------------------------------------------
+
+while True:
+    x=input("Enter news: ")
+    x=[x]
+    tfidf_test_input = tfidf_vectorizer.transform(x)
+
+    linear_clf = PassiveAggressiveClassifier()
+
+    linear_clf.fit(tfidf_train, y_train)
+    pred = linear_clf.predict(tfidf_test_input)
+    print (pred)
 # score = metrics.accuracy_score(y_test, pred)
-# print("accuracy(Mnb hash):   %0.3f" % score)
+# print("accuracy(PAC tfid):   %0.3f" % score)
 # cm = metrics.confusion_matrix(y_test, pred, labels=['FAKE', 'REAL'])
 # plot_confusion_matrix(cm, classes=['FAKE', 'REAL'])
 # print(cm)
 
-
-# #--------------------------------------------------------------
-# # Applying Passive Aggressive Classifier
-# #--------------------------------------------------------------
-
-# clf = PassiveAggressiveClassifier()    #removed n_iter=50
-
-# clf.fit(hash_train, y_train)
-# pred = clf.predict(hash_test)
-# score = metrics.accuracy_score(y_test, pred)
-# print("accuracy(PAC hash):   %0.3f" % score)
-# cm = metrics.confusion_matrix(y_test, pred, labels=['FAKE', 'REAL'])
-# plot_confusion_matrix(cm, classes=['FAKE', 'REAL'])
-# print(cm)
