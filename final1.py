@@ -266,6 +266,7 @@ print(cm)
 
 while True:
     x=input("Enter news: ")
+    query=x
     x=[x]
     tfidf_test_input = tfidf_vectorizer.transform(x)
 
@@ -280,3 +281,12 @@ while True:
 # plot_confusion_matrix(cm, classes=['FAKE', 'REAL'])
 # print(cm)
 
+    try: 
+        from googlesearch import search 
+    except ImportError: 
+        print("No module named 'google' found") 
+
+    # to search 
+
+    for j in search(query, tld="co.in", num=10, stop=10, pause=2): 
+        print(j) 
