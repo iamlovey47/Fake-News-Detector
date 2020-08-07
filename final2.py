@@ -15,7 +15,7 @@ import itertools
 import numpy as np
 
 from flask import Flask, abort, jsonify, request, render_template
-from sklearn.externals import joblib
+import joblib
 from feature import *
 import json
 
