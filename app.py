@@ -312,7 +312,7 @@ def get_delay():
         links.append(j) 
 
 
-    return f'<html><body><h1>{pred[0]}</h1> <a href={links[0]}> Article 1 </a><br> <a href={links[1]}> Article 2 </a>  <form action="/"> <button type="submit">back </button> </form></body></html>'
+    return f'<html><body><h1>It is a {pred[0]} news. </h1><h2>You may refer to the following articles for more details.</h2> <a href={links[0]}> Article 1 </a><br> <a href={links[1]}> Article 2 </a>  <form action="/"> <button type="submit">back </button> </form></body></html>'
     # return render_template('result.html')
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 3000))
