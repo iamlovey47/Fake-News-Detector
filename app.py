@@ -311,9 +311,9 @@ def get_delay():
     for j in search(toSearch, tld="co.in", num=10, stop=10, pause=2): 
         links.append(j) 
 
-
-    return f'<html><body><h1>It is a {pred[0]} news. </h1><h2>You may refer to the following articles for more details.</h2> <a href={links[0]}> Article 1 </a><br> <a href={links[1]}> Article 2 </a>  <form action="/"> <button type="submit">back </button> </form></body></html>'
-    # return render_template('result.html')
+# <style>body{text-align: center;font-family: Arial, Helvetica, sans-serif;}</style>
+    # return f'<html><style>body{text-align: center;font-family: Arial, Helvetica, sans-serif;}</style><body><h1>It is a {pred[0]} news. </h1><h2>You may refer to the following articles for more details.</h2> <a href={links[0]}> Article 1 </a><br> <a href={links[1]}> Article 2 </a>  <form action="/"> <button type="submit">back </button> </form></body></html>'
+    return render_template('result.html', links=links, pred=pred[0])
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 3000))
     app.run(port, debug=False)

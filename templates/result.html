@@ -1,14 +1,15 @@
 <html>
-<style type="text/css">
+<style >
 	body{
 		text-align: center;
+		font-family: Arial, Helvetica, sans-serif;
 
 	}
 </style>
 <body>
-	<h1>{pred[0]}</h1> 
-	<a href={links[0]}> Article 1 </a><br> 
-	<a href={links[1]}> Article 2 </a>  
+	<h1>{{pred}}</h1> 
+	<a href={{links[0]}}> Article 1 </a><br> 
+	<a href={{links[1]}}> Article 2 </a>  
 	<form action="/"> <button type="submit">Search Again </button> </form>
 </body>
 </html>
